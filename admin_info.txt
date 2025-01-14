@@ -1,0 +1,10 @@
+TO MAINTAIN CONSISTENCY:
+
+superuser suggestion: 
+username = admin
+password = 2024b11Admin
+
+
+postgre admin suggestion:
+user:admin
+pass:admin

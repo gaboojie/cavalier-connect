@@ -1,0 +1,189 @@
+{% extends "myaccount/base.html" %}
+{% load filters %}
+
+{% block title %}
+    Friends
+{% endblock %}
+
+{% block content %}
+{% if message %}
+    <div style="color: green; font-weight: bold; margin-bottom: 20px;">
+        {{ message }}
+    </div>
+{% endif %}
+
+<style>
+    .container {
+        display: flex;
+        justify-content: center;
+    }
+    .user-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 100px;
+        width: 100%;
+        max-width: 1200px;
+    }
+    .user-row {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background-color: var(--input-box-color);
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .user-info {
+        margin-bottom: 10px; 
+    }   
+    .action-buttons {
+        margin-bottom: 10px;
+    }
+    .profile-picture {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin-bottom: 10px;
+    }
+    .user-name {
+        font-weight: bold;
+        margin-top: 10px;
+        font-size: 14px;
+        color: var(--blue-color);
+    }
+    .username {
+        color: var(--text-color);
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    .friend-details {
+        margin-top: 15px;
+        font-size: 12px;
+        text-align: left;
+    }
+    .submit-button, .second-button {
+        background-color: #E57200;
+        color: #ffffff;
+        border: none;
+        padding: 8px 15px;
+        font-size: 14px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .second-button {
+        background-color: #232D4B;
+    }
+    .event-list {
+        margin-top: 10px;
+    }
+    .event-item {
+        margin-bottom: 5px; 
+    }
+    details summary {
+        cursor: pointer;
+        font-weight: bold;
+    }
+    details summary::marker {
+        color: #E57200; 
+    }
+    .title-link-hover:hover {
+        color: #E57200;
+        font-weight: bolder;
+    }
+</style>
+
+<script>
+    function confirmRemoveFriend() {
+        return confirm("Are you sure you want to remove this friend?");
+    }
+</script>
+
+<div class="container">
+    <div class="left-content">
+        <div class="user-list mb-1">
+            {% for user in all_users %}
+                <div class="user-row">
+                    {% with profile_picture_map|get:user.id as profile_picture %}
+                    {% if profile_picture  %}
+                        <img class="rounded-circle profile-picture" 
+                             src="{{ profile_picture }}" alt="Profile Picture">
+                    {% else %}
+                        <img class="rounded-circle profile-picture" 
+                             src="https://i.pinimg.com/280x280_RS/55/96/4e/55964ebb02710d6b9ce1c26f1d857906.jpg" 
+                             alt="Anonymous Profile Picture">
+                    {% endif %}
+                    {% endwith %}
+
+                    <div class="user-info">
+                        <span class="user-name" style="display: block;">{{ user.first_name }} {{ user.last_name }}</span>
+                        <span class="username" style="display: block;">@{{ user.username }}</span>
+                    </div>                    
+
+                    <div class="action-buttons mb-1">
+                        {% if user.id in friend_ids %}
+                            <details>
+                                <summary>View Details</summary>
+                                <div class="friend-details">
+                                    <!-- Display Email -->
+                                    <p><strong>Email:</strong> {{ user.email }}</p>
+                                    <!-- Display Upcoming Events -->
+                                    <p><strong>{{ user.first_name }}'s Upcoming Events:</strong></p>
+                                    <div class="user-row">
+                                        <div class="event-list">
+                                            {% for event in all_events %}
+                                                {% if event.creator.id == user.id %}
+                                                    <div class="event-item">
+                                                        <a href="{% url 'events:view_event' event.pk %}" class="blue-class title-link-hover" style="font-weight: bold; text-decoration: none">
+                                                            {{ event.title }} - {{ event.start_time|date:"m/d/Y" }}
+                                                        </a>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </details>
+                            <form method="post" action="{% url 'friends' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="friend_id" value="{{ user.id }}">
+                                <button type="submit" name="action" value="remove_friend" class="second-button mt-2" onclick="return confirmRemoveFriend()">
+                                    Remove Friend
+                                </button>
+                            </form>
+                        {% elif user.id in sent_request_ids %}
+                            <form method="post" action="{% url 'friends' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <button type="submit" name="action" value="cancel_request" class="second-button">
+                                    Cancel Request
+                                </button>
+                            </form>
+                        {% elif user.id in pending_request_ids %}
+                            <form method="post" action="{% url 'friends' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <button type="submit" name="action" value="accept_request" class="submit-button">Accept</button>
+                                <button type="submit" name="action" value="reject_request" class="second-button">Deny</button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{% url 'friends' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="invitee_id" value="{{ user.id }}">
+                                <button type="submit" name="action" value="send_request" class="submit-button">
+                                    Invite Friend
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <p>No users found.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<div style="margin: 50px;"></div>
+{% endblock %}

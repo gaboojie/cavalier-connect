@@ -1,0 +1,57 @@
+{% extends "myaccount/base.html" %}
+
+{% block title %}
+    Poll Results
+{% endblock %}
+{% block content %}
+<head>
+    <title>Cavalier Connect</title>
+</head>
+<body>
+    <main class="landing">
+        <div class="overlay">
+            <h1 class="landing-title">Cavalier Connect</h1>
+            {% if user.is_authenticated %}
+            <p style = "text-transform: capitalize; font-weight: 600;">Welcome, {{ user.first_name }} {{ user.last_name }}!</p>
+            <!-- Events Container -->
+            {% if user.role != 2 %}
+                <div class="events-container">
+                    <h2>My Events: <a class ="expand-event-view" href="/?key=1">See All Past Events</a></h2>
+                    {% if my_events|length > 0 %}
+                        <ul>
+                            {% for e in my_events %}
+                            <li><a class = "event_item" href="{% url 'events:view_event' e.pk %}">
+                                Event: {{ e.title }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <h2>Upcoming Events: <a class="expand-event-view"  href="/?key=2">See All Past Events</a></h2>
+                    {% if upcoming_events|length > 0 %}
+                        <ul>
+                            {% for event_info in upcoming_events %}
+                            <li><a class = "event_item" href="{% url 'events:view_event' event_info.event_pk %}">
+                                {{ event_info.title }} - Status: {{ event_info.status }}</a></li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>You have not been invited to any events!</p>
+                    {% endif %}
+                    <h2>Create an Event:</h2>
+                    <a class="orange-btn" href="{% url 'events:create_event' %}">Create Event</a>
+                </div>
+            {% else %}
+                <div class="events-container d-flex flex-column justify-content-center text-center">
+                    <a class="event_item" href="{% url 'pma' %}">PMA Dashboard</a>
+                </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <a class="google-button" href="{% url 'social:begin' 'google-oauth2' %}">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-logo">
+            Get Started
+        </a>
+    </div>
+        {% endif %}
+    </main>
+</body>
+{% endblock %}

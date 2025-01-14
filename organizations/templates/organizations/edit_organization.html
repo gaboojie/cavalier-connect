@@ -1,0 +1,119 @@
+{% extends "myaccount/base.html" %}
+
+{% block title %}
+Edit Organization
+{% endblock %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 50px;
+    }
+
+    .form-container {
+        background-color: var(--background-color);
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        width: 100%;
+    }
+
+    h1 {
+        color: #E57200;
+        font-size: 2rem;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        color: var(--blue-color);
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .form-control {
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+
+    .text-danger p {
+        font-size: 0.9rem;
+    }
+
+    .submit-button {
+        background-color: #E57200;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    .submit-button:hover {
+        background-color: #cf6200;
+    }
+
+    .alert {
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container" style="margin: 100px auto;">
+    <div class="form-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <h1>Edit Your Organization</h1>
+
+        <form method="post" action="{% url 'organizations:edit_organization' pk=organization.pk %}">
+            {% csrf_token %}
+
+            <!-- Organization Name -->
+            <div class="form-group">
+                <label for="id_name">Organization Name:</label>
+                <input required id="id_name" class="form-control" type="text" name="name" maxlength="200" value="{{ form.instance.name }}">
+                {% if form.name.errors %}
+                    <div class="text-danger">
+                        {% for error in form.name.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label for="id_description">Description:</label>
+                <textarea required id="id_description" class="form-control" name="description" style="min-height: 100px;">{{ form.instance.description }}</textarea>
+                {% if form.description.errors %}
+                    <div class="text-danger">
+                        {% for error in form.description.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Submit Button -->
+            <div>
+                <input type="submit" class="submit-button" value="Save Changes">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

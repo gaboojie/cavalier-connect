@@ -1,0 +1,190 @@
+<!--# Title: Navbar-->
+<!--#-->
+<!--# Date Accessed: October 2, 2024-->
+<!--#-->
+<!--# URL: https://getbootstrap.com/docs/5.3/components/navbar/-->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cavalier Connect</title>
+    {% load django_bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/event_styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/myaccount.css' %}">
+    <link rel="stylesheet" href="{% static 'css/pma.css' %}">
+    <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous">
+    </script>
+
+    <style>
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        main {
+            margin-top: 10px;
+            margin-bottom: -40px;
+        }
+        .footer {
+            position: relative;
+            width: 100%;
+            padding: 1rem;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+            margin-top: auto;
+        }
+        .custom-drop-down-menu {
+            background-color: transparent;
+            border: none;
+        }
+        .custom-drop-down-element {
+            color: #0e3685;
+        }
+        .btn-action {
+            background-color: #E57200;
+            color: var(--text-color);
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .btn-action:hover {
+            background-color: #c06102;
+            color: var(--text-color);
+            box-shadow: 0 4px 8px rgba(var(--background-rgb), 0.5);
+        }
+        .log-button {
+            color: white;
+            background-color: #e57200;
+            text-decoration: None;
+            border: 1px solid #e57200;
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+        .log-button:hover {
+            color: #e57200;
+            background-color: white;
+            text-decoration: None;
+            border: 1px solid #e57200;
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+    </style>
+    
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-md navbar-pma">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/"><span style="color:orange">Cavalier</span> Connect</a>
+            {% if user.is_authenticated and user.role == 2 %}
+                <a class="navbar-brand ml-1" href="/">[PMA]</a>
+            {% endif %}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse align-items-center" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-center text-center">
+
+                    <!-- My account drop down menu-->
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <button class="btn btn-primary dropdown-toggle custom-drop-down-menu" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                My Account
+                            </button>
+
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                {% if user.role == 1 %}
+                                    <li><a class="dropdown-item custom-drop-down-element" href="/myaccount">Profile</a></li>
+                                    <li><a class="dropdown-item custom-drop-down-element" href="/friends">Friends</a></li>
+                                {% endif %}
+                                {% if user.role == 2 %}
+                                    <li><a class="dropdown-item custom-drop-down-element" href="/pma">PMA Dashboard</a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                    {% endif %}
+
+                    <!-- Events drop down menu-->
+                    <li class="nav-item dropdown align-items-center text-center">
+                        <button class="btn btn-primary dropdown-toggle custom-drop-down-menu" type="button" id="dropdownMenuButtonEvents" data-bs-toggle="dropdown" aria-expanded="false">
+                            Events
+                        </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonEvents">
+                                <a class="dropdown-item custom-drop-down-element" href="/search">Event Search</a>
+                                {% if user.is_authenticated and role != 2 %}
+                                    <a class="dropdown-item custom-drop-down-element" href="/upcoming">Upcoming Events</a>
+                                    <a class="dropdown-item custom-drop-down-element" href="/events/create">Create Event</a>
+                                {% endif %}
+                            </ul>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <button class="btn btn-primary dropdown-toggle custom-drop-down-menu" type="button" id="dropdownMenuButtonEvents" data-bs-toggle="dropdown" aria-expanded="false">
+                            Organizations
+                        </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonEvents">
+                                <a class="dropdown-item custom-drop-down-element" href="/search/organization">Organization Search</a>
+                                {% if user.is_authenticated and role != 2 %}
+                                    <a class="dropdown-item custom-drop-down-element" href="/organizations/create">Create Organization</a>
+                                {% endif %}
+                            </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            <!-- Log out button -->
+            {% if user.is_authenticated %}
+                <a class="nav-item mx-2 log-button" href="{% url 'logout' %}">Log out</a>
+            {% else %}
+                <a class="nav-item mx-2 log-button" href="{% url 'social:begin' 'google-oauth2' %}">Log in</a>
+            {% endif %}
+
+        </div>
+        <div class="toggle-switch">
+            <label class="switch-label">
+                <input type="checkbox" class="checkbox" id ="theme-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>  
+    </nav>
+
+    <header>
+
+    </header>
+
+    <main>
+        {% block content %}
+        <!-- will add other html views here in their files -->
+        {% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container" style="min-height: 50px">
+            Copyright © 2024 UVA CS 3240 Team B-11. All Rights Reserved.
+            This system is a class project and is not monitored. Please refrain from submitting real information.
+        </div>
+    </footer>
+    <script>
+    const toggleSwitch = document.getElementById('theme-toggle');
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    toggleSwitch.checked = currentTheme === 'light'; 
+    toggleSwitch.addEventListener('change', () => {
+        const theme = toggleSwitch.checked ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme); 
+    });
+    </script>
+</body>
+</html>

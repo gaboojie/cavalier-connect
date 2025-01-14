@@ -1,0 +1,601 @@
+{% extends "myaccount/base.html" %}
+{% load efilters %}
+
+{% block title %}
+View Event
+{% endblock %}
+
+{% block content %}
+<title>Event</title>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<style>
+  .text-input-border {
+    outline: 1px solid #0e3685;
+  }
+
+  .orange-text {
+    color: var(--orange-color);
+  }
+
+  .blue-text {
+    color: var(--blue-color);
+  }
+
+  .blue-button {
+    color: var(--blue-color);
+    background-color: var(--background-color);
+    padding: 10px 10px;
+    text-decoration: none;
+    border: 2px solid #0e3685;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .blue-button:hover {
+    font-weight: bold;
+    background-color: #0e3685;
+    border: 2px solid #0e3685;
+    border-radius: 8px;
+    color: white;
+  }
+
+  .orange-button {
+    color: white;
+    background-color: #e57200;
+    padding: 10px 10px;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: 2px solid #e57200;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease, padding 0.3s ease;
+  }
+
+  .orange-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px 5px rgba(207,98,0, 0.815);
+    transition: all 0.2s ease-out;
+  }
+
+  .outline-container {
+    border: 2px solid #0e3685;
+    margin: 0;
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  .outline-container-thin {
+    border: 1px ridge #0e3685;
+    margin: 0;
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  .choice-row {
+    border: 2px solid #0e3685;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 0;
+  }
+
+</style>
+<div style="padding: 50px"></div>
+<div style="margin: 6%">
+  {% if event %}
+    <!-- Anonymous user view -->
+    {% if role == "anonymous" %}
+      <div class="container outline-container">
+        <h1 class="display-1 fw-bold blue-text">Event: {{ event.title }}</h1>
+        <div class="d-flex d-inline-block" style="margin-bottom: 10px">
+          <p class="display-6 blue-text" style="padding-right: 0.5%"> Created by: </p>
+          <p class="display-6 orange-text"> {{ event.creator.username }} </p>
+        </div>
+        <p> You must be logged in to see more information! </p>
+        <a class="google-button" href="{% url 'social:begin' 'google-oauth2' %}" style="margin-bottom: 10px">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-logo">
+          Log-in
+        </a>
+      </div>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+      <!-- Print any messages -->
+      {% if message %}
+        {% if message|first in 'Error' %}
+          <!-- Print error message -->
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>{{message}}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% else %}
+          <!-- Print success message -->
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>{{message}}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endif %}
+      {% endif %}
+
+      <!-- Common user that is not logged-in view -->
+      {% if role == "not-in-event" %}
+        <div class="container outline-container">
+          <h1 class="display-1 fw-bold blue-text">Event: {{ event.title }}</h1>
+          <div class="d-flex d-inline-block" style="margin-bottom: 10px">
+            <p class="display-6 blue-text" style="padding-right: 0.5%"> Created by: </p>
+            <p class="display-6 orange-text"> {{ event.creator.username }} </p>
+          </div>
+          <hr class="blue-line" style="margin-bottom: 15px">
+          <p class="blue-text fw-bold"> Description: </p>
+          <div class="container outline-container-thin" style="margin-top: 10px; margin-bottom: 15px">
+            <p class="blue-text"> {{ event.description }} </p>
+          </div>
+          <div class="d-flex d-inline-block">
+            <p class="blue-text fw-bold" style="margin-right: 10px"> Starts at: </p>
+            <p class="blue-text"> {{ event.start_time }}</p>
+          </div>
+          <div class="d-flex d-inline-block">
+            <p class="blue-text fw-bold" style="margin-right: 10px"> Ends at: </p>
+            <p class="blue-text"> {{ event.end_time }}</p>
+          </div>
+          <hr class="blue-line" style="margin-bottom: 15px">
+          <!-- Participant Status: None -->
+          {% if status == "none" %}
+            <h5 class="blue-text fw-bold">You are not a member of this event, but you can request to join this event: </h5>
+            <form method="post">
+              {% csrf_token %}
+              <input type="text" name="request_access" class="d-none form-control" value="{{ user.username }}"></input>
+              <button type="submit" class="orange-button" name="form_type" value="request_access" style="margin: 10px">Request to join event</button>
+            </form>
+          {% endif %}
+
+          {% if status == "invited" %}
+            {% if approved == True %}
+              <!-- Participant Status: Invited -->
+              <h6 class="blue-text fw-bold" style="margin-bottom: 15px; margin-top: 20px;">You have been invited to join this event. Do you wish to accept?</h6>
+              <div class="d-flex d-inline-block">
+                <form method="post" style="margin-right: 20px">
+                  {% csrf_token %}
+                  <button type="submit" class="orange-button" name="form_type" value="accept_event">Accept Event</button>
+                </form>
+                <form method="post" style="margin-bottom: 20px">
+                  {% csrf_token %}
+                  <button type="submit" class="orange-button" name="form_type" value="deny_event">Deny Event</button>
+                </form>
+              </div>
+            {% else %}
+              <!-- Participant Status: Requested -->
+              <h6 class="blue-text fw-bold" style="margin-bottom: 15px; margin-top: 20px;">Your request to join this event has been sent!</h6>
+            {% endif %}
+          {% endif %}
+
+          <!-- Participant Status: Denied -->
+          {% if status == "denied" %}
+            {% if approved == True %}
+              <h6 class="blue-text fw-bold" style="margin-bottom: 15px; margin-top: 20px;">You have denied an invite to join this event.</h6>
+            {% else %}
+              <h6 class="blue-text fw-bold" style="margin-bottom: 15px; margin-top: 20px;">Your request to join this event has been denied.</h6>
+            {% endif %}
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {% if role == "in-event" or role == "owner" or role == "pma" %}
+        <div class="container outline-container">
+          <h1 class="display-1 fw-bold blue-text">Event: {{ event.title }}</h1>
+          <div class="d-flex d-inline-block" style="margin-bottom: 10px">
+            <p class="display-6 blue-text" style="padding-right: 0.5%"> Created by: </p>
+            <p class="display-6 orange-text"> {{ event.creator.username }} </p>
+          </div>
+          <hr class="blue-line" style="margin-bottom: 15px">
+          <p class="blue-text fw-bold"> Description: </p>
+          <div class="container outline-container-thin" style="margin-top: 10px; margin-bottom: 15px">
+            <p class="blue-text"> {{ event.description }} </p>
+          </div>
+          <div class="d-flex d-inline-block">
+            <p class="blue-text fw-bold" style="margin-right: 10px"> Starts at: </p>
+            <p class="blue-text"> {{ event.start_time }}</p>
+          </div>
+          <div class="d-flex d-inline-block">
+            <p class="blue-text fw-bold" style="margin-right: 10px"> Ends at: </p>
+            <p class="blue-text"> {{ event.end_time }}</p>
+          </div>
+          <div class="d-flex d-inline-block">
+            <p class="blue-text fw-bold" style="margin-right: 10px"> Location: </p>
+            <p class="blue-text"> {{ event.location }}</p>
+          </div>
+
+            <!-- Recurrence Info -->
+            {% if next_recurrence is not None %}
+                <p><strong>Next Recurrence:</strong> <a href="{% url 'events:view_event' next_recurrence.id %}">
+                    {{  next_recurrence.start_time }}
+                </a></p>
+            {% elif not event.is_recurring %}
+                <!-- Display nothing -->
+            {% else %}
+                <p>No future recurrences.</p>
+            {% endif %}
+
+          <!-- Handle Delete Event -->
+          {% if role == "owner" or role == "pma" %}
+            <button id="deleteButton" class="btn btn-danger ">Delete Event</button>
+            <div id="deleteOptions" style="display:none;">
+              {% if event.is_recurring %}
+                <button id="deleteOnlyThis" class="btn btn-danger">Delete Only This Event</button>
+                <button id="deleteAll" class="btn btn-danger">Delete All Future Occurrences</button>
+              {% else %}
+                <button id="deleteOnlyThis" class="btn btn-danger">Delete Event</button>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+        <div style="margin-top: 10px"></div>
+
+
+        <!-- Button to toggle collapse -->
+        <button class="btn blue-button" style="width: 100%" type="button" data-toggle="collapse" data-target="#collapsibleFilesContainer" aria-expanded="false" aria-controls="collapsibleContainer">
+          View Files
+        </button>
+        <!-- Collapsible container -->
+        <div class="collapse mt-1" id="collapsibleFilesContainer">
+          <div class="card card-body" style="background-color: transparent">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              {% if request.GET.search %}
+                <h1 class="display-6" style="color: var(--blue-color); padding-top: 2%; padding-bottom: 1%">Files matching search query:</h1>
+              {% else %}
+                <h1 class="display-6" style="color: var(--blue-color); padding-top: 2%; padding-bottom: 1%">Uploaded Files:</h1>
+              {% endif %}
+              <form method="GET" action="{% url 'events:view_event' event.pk %}" class="d-flex" style="width: 50%;">
+                <input type="text" name="search" class="me-2 form-control text-input-border" placeholder="Search files by keywords" value="{{ request.GET.search }}">
+                <button type="submit" class="btn btn-primary me-2" id="update-button">Search</button>
+                <button type="submit" name="search" value="" class="btn btn-secondary ms-1" id="update-button">Clear</button>
+              </form>
+            </div>
+
+            <hr class="blue-line" style="margin-bottom: 15px">
+
+            {% if event_files %}
+              {% for file in event_files %}
+                <div id="file{{ file.id }}" class="file-details my-4">
+                  <div class="row align-items-center">
+                    <div class="col-md-3">
+                      {% if file.file.name and file.file.name|has_extension:".jpg" %}
+                        <img src="{{ file.get_file_url }}" alt="{{ file.file }}" class="img-fluid">
+                      {% elif file.file.name and file.file.name|has_extension:".pdf" %}
+                        <embed src="{{ file.get_file_url }}" width="300" height="250" type="application/pdf" class="img-fluid">
+                      {% elif file.file.name %}
+                        <embed src="{{ file.get_file_url }}" width="300" height="250" class="img-fluid">
+                      {% else %}
+                        <p>No file available</p>
+                      {% endif %}
+                    </div>
+
+                    <div class="col-md-7">
+                      <h4>{{ file.title }}</h4>
+                      <p><strong>Description:</strong> {{ file.description }}</p>
+                      <p><strong>Keywords:</strong> {{ file.keywords }}</p>
+                      <p><strong>Uploaded At:</strong> {{ file.uploaded_at|date:"m/d/Y, g:i a" }}</p>
+
+                      {% if request.user == file.user or request.user == file.event.creator %}
+                        <button type="button" data-bs-toggle="collapse" data-bs-target="#editForm{{ file.id }}" class="btn btn-secondary" id="update-button">
+                          EDIT FILE
+                        </button>
+                        <div class="collapse" id="editForm{{ file.id }}">
+                          <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="file_id" value="{{ file.id }}">
+                            <div class="form-group my-2">
+                              <label for="edit_title">Title:</label>
+                              <input type="text" id="edit_title" name="edit_title" value="{{ file.title }}" required class="form-control text-input-border" placeholder="Title">
+                            </div>
+                            <div class="form-group my-2">
+                              <label for="edit_description">Description:</label>
+                              <textarea name="edit_description" id="edit_description" class="form-control text-input-border" required>{{ file.description }}</textarea>
+                            </div>
+                            <div class="form-group my-2">
+                              <label for="edit_keywords">Keywords:</label>
+                              <input type="text" id="edit_keywords" name="edit_keywords" value="{{ file.keywords }}" required class="form-control text-input-border" placeholder="Keywords">
+                            </div>
+                            <button type="submit" name="form_type" value="edit_file" class="btn btn-primary mb-1" id="makechange-button">Save Changes</button>
+                          </form>
+                        </div>
+                      {% endif %}
+                      {% if request.user == file.user or request.user == file.event.creator %}
+                        <button type="submit" form="deleteFileForm{{ file.id }}" class="btn btn-danger" id="update-button">
+                          DELETE FILE
+                        </button>
+                        <form method="post" action="{% url 'events:delete_event_file' event.pk file.id %}" id="deleteFileForm{{ file.id }}" style="display: none;">
+                          {% csrf_token %}
+                        </form>
+                      {% endif %}
+                      <a href="{{ file.get_file_url }}" download class="btn orange-button" id="submit-button" style="text-align: center;">Download File</a>
+                      <div class="mb-3"></div>
+                    </div>
+                  </div>
+                  <hr>
+                </div>
+              {% endfor %}
+            {% else %}
+              {% if no_match == True %}
+                <p>No files matched your search query!</p>
+              {% else %}
+                <p>No files have been uploaded yet.</p>
+              {% endif %}
+            {% endif %}
+            <!-- File uploading -->
+            {% if role != "pma" %}
+              <h1 class="display-6" style="color: var(--blue-color); padding-top: 20px; padding-bottom: 20px">Upload Event Material:</h1>
+              <form method="post" enctype="multipart/form-data" style="padding-bottom: 2%">
+                {% csrf_token %}
+                {{ file_form.as_p }}
+                {% if form.username.errors %}
+                  <div class="error-message">{{ form.file.errors.0 }}</div>
+                {% endif %}
+                <div class="form-group" style="margin-bottom: 10px;">
+                  <label for="id_title" class="lead">File Title:</label>
+                  <input type="text" name="title" id="id_title" class="form-control text-input-border" placeholder="Enter a title for the file"
+                         required>
+                </div>
+                <div class="form-group" style="margin-bottom: 10px;">
+                  <label for="id_description" class="lead">File Description:</label>
+                  <textarea name="description" id="id_description" class="form-control text-input-border" rows="3" placeholder="Enter a description"
+                            required></textarea>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 10px;">
+                  <label for="id_keywords" class="lead">Keywords:</label>
+                  <input type="text" name="keywords" id="id_keywords" class="form-control text-input-border"
+                         placeholder="Enter comma-separated keywords" required>
+                  {% if form.keywords.errors %}
+                  <div class="error-message" style="color: red;">
+                    {{ form.keywords.errors.0 }}
+                  </div>
+                  {% endif %}
+                </div>
+
+
+                <input type="file" name="file" style="background-color: transparent; color: var(--blue-color)">
+                <button type="submit" name="form_type" class="orange-button" value="upload_file">Upload File</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+
+
+        <!-- Button to toggle event invites -->
+        <button class="btn blue-button mt-3" style="width: 100%" type="button" data-toggle="collapse" data-target="#collapsibleParticipantsContainer" aria-expanded="false" aria-controls="collapsibleContainer">
+          View Event Participants
+        </button>
+        <!-- Collapsible container -->
+        <div class="collapse mt-1" id="collapsibleParticipantsContainer">
+          <div class="card card-body" style="background-color: transparent">
+            {% if role == "owner" %}
+              <!-- Invites & Requests-->
+              <h1 class="display-6" style="color: var(--blue-color); padding-top: 2%">Invite user: </h1>
+              <form class="d-flex flex-row" method="post" style="padding-bottom: 2%">
+                {% csrf_token %}
+                <input name="username" class="form-control text-input-border" type="text" placeholder="Username"
+                       style="max-width: 400px; padding-right: 1%">
+                <button type="submit" name="form_type" class="orange-button" value="invite_user" style="margin-left: 10px">Invite</button>
+              </form>
+              <hr class="blue-line" style="margin-bottom: 30px">
+            {% endif %}
+            <div class="row">
+              <div class="col">
+                <!-- Invites-->
+                <h1 class="display-6" style="color: var(--blue-color)">Invites: </h1>
+                {% if invited_participants|length > 0 %}
+                <ul>
+                  {% for participant in invited_participants %}
+                  <li>
+                    <ul class="fluid-container list-group list-group-horizontal align-items-center">
+                      <li style="list-style-type: none; margin-left: 10px" class="blue-text"> {{ participant.username }}</li>
+                      <li style="list-style-type: none; margin-left: 10px" class="fw-bold blue-text"> {{ participant.status }}</li>
+                      {% if role == "owner" %}
+                      <li style="list-style-type: none; margin-left: 10px">
+                        <form method="post">
+                          {% csrf_token %}
+                          <input type="text" name="delete_invite" class="d-none form-control"
+                                 value="{{ participant.username }}"></input>
+                          <button type="submit" class="orange-button" name="form_type" value="delete_invite">Remove Invite</button>
+                        </form>
+                      </li>
+                      {% endif %}
+                    </ul>
+                  </li>
+                  {% endfor %}
+                </ul>
+                {% else %}
+                <p>No one has been invited!</p>
+                {% endif %}
+              </div>
+              <div class="col">
+                <!-- Requests-->
+                <h1 class="display-6" style="color: var(--blue-color)">Requests: </h1>
+                {% if requested_participants|length > 0 %}
+                <ul>
+                  {% for participant in requested_participants %}
+                  <li>
+                    <ul class="fluid-container list-group list-group-horizontal align-items-center">
+                      <li> {{ participant.username }}</li>
+                      {% if role == "owner" %}
+                        <li style="list-style-type: none; margin-left: 10px">
+                          <form method="post">
+                            {% csrf_token %}
+                            <input type="text" name="approve_request" class="d-none form-control"
+                                   value="{{ participant.username }}"></input>
+                            <button type="submit" class="orange-button" name="form_type" value="approve_request">Accept</button>
+                          </form>
+                        </li>
+                        <li style="list-style-type: none; margin-left: 10px">
+                          <form method="post">
+                            {% csrf_token %}
+                            <input type="text" name="deny_request" class="d-none form-control"
+                                   value="{{ participant.username }}"></input>
+                            <button type="submit" class="orange-button" name="form_type" value="deny_request">Deny</button>
+                          </form>
+                        </li>
+                      {% endif %}
+                    </ul>
+                  </li>
+                  {% endfor %}
+                </ul>
+                {% else %}
+                <p>No one has requested to join this event!</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Button to toggle comments -->
+        <button class="btn blue-button mt-3" style="width: 100%" type="button" data-toggle="collapse" data-target="#collapsibleCommentsContainer" aria-expanded="false" aria-controls="collapsibleContainer">
+          View Comments
+        </button>
+        <!-- Collapsible container -->
+        <div class="collapse mt-1" id="collapsibleCommentsContainer">
+          <div class="card card-body" style="background-color: transparent">
+            <!-- Comment form -->
+            {% if role != "pma" %}
+              <h2 class="display-6" style="color: var(--blue-color); padding-top: 2%">Post a comment:</h2>
+              <form method="post" style="padding-bottom: 2%">
+                {% csrf_token %}
+                <textarea id = "comment_textarea" name="comment" rows="4" class="form-control" placeholder="Write your comment here..." required
+                          style="max-width: 600px; border: 1px solid #2d3a5f"></textarea>
+                <button type="submit" name="form_type" value="comment" class="orange-button mt-2">Post Comment</button>
+              </form>
+            {% endif %}
+            <h2 class="display-6" style="color: var(--blue-color); padding-top: 2%">Comments:</h2>
+            <!-- Comment list -->
+            {% if comments %}
+              <ul>
+                {% for comment in comments %}
+                  <li>
+                      <span style="color: var(--blue-color);" class="d-flex align-items-center">
+                        <div style="color: #a5a5a5; margin-right: 10px">
+                          {{ comment.created_at|date:"m/d/Y, g:i a" }}
+                        </div>
+                        <strong style="margin-right: 10px">{{ comment.user.username }}: </strong>
+                        {{ comment.text }}
+                        {% if user.username == event.creator.username or comment.user.username == user.username %}
+                          <form method="post" style="margin-left: 10px">
+                            {% csrf_token %}
+                            <input name="comment_to_delete" value="{{ comment.pk }}" class="d-none"></input>
+                            <button type="submit" name="form_type" class="btn btn-danger text-center" value="delete_comment">Delete Comment</button>
+                          </form>
+                        {% endif %}
+                      </span>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p>No comments yet. Be the first to comment!</p>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if role == "owner" %}
+          <!-- Button to toggle organizations -->
+          <button class="btn blue-button mt-3" style="width: 100%" type="button" data-toggle="collapse" data-target="#collapsibleOrganizationsContainer" aria-expanded="false" aria-controls="collapsibleContainer">
+            Organizations
+          </button>
+          <!-- Collapsible container -->
+          <div class="collapse mt-1" id="collapsibleOrganizationsContainer">
+            <div class="card card-body" style="background-color: transparent">
+              <div class="row">
+                  <div class="col">
+                    <!-- Add organization -->
+                    <h3 style="color: var(--blue-color); padding-top: 2%">Add members from organization:</h3>
+                    <form class="d-flex flex-row" method="post" style="padding-bottom: 2%">
+                      {% csrf_token %}
+                      <input name="organization_to_add" class="form-control text-input-border" type="text" placeholder="Organization name" style="max-width: 400px; padding-right: 1%">
+                      <button type="submit" name="form_type" class="orange-button" value="add_organization" style="margin-left: 10px">Add</button>
+                    </form>
+                  </div>
+                  <div class="col">
+                    <!-- Remove organization -->
+                    <h3 style="color: var(--blue-color); padding-top: 2%">Remove members from organization:</h3>
+                    <form class="d-flex flex-row" method="post" style="padding-bottom: 2%">
+                      {% csrf_token %}
+                      <input name="organization_to_remove" class="form-control text-input-border" type="text" placeholder="Organization name" style="max-width: 400px; padding-right: 1%">
+                      <button type="submit" name="form_type" class="orange-button" value="remove_organization" style="margin-left: 10px">Remove</button>
+                    </form>
+                  </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+      {% endif %}
+      {% if role == "in-event" and event.creator.username != user.username %}
+        <form method="post" style="text-align: center; margin-top: 20px;">
+          {% csrf_token %}
+          <button type="submit" name="form_type" value="remove_self" class="btn btn-danger">
+              Remove Yourself as a Participant
+          </button>
+        </form>
+      {% endif %}
+    {% endif %}
+  {% else %}
+    <!-- Event does not exist view -->
+    <hr class="blue-line" style="margin-bottom: 30px">
+    <h1 class="display-1 lead orange-text" style="font-weight: bold">Uh-oh!</h1>
+    <h1 class="display-6 lead blue-text" style="margin-bottom: 50px">The event you requested does not exist.</h1>
+    <a href="/" class="orange-button">Return home</a>
+    <hr class="blue-line" style="margin-top: 50px">
+  {% endif %}
+  <div style="margin-top: 200px"></div>
+</div>
+
+<!-- Delete Event Code -->
+<script>
+  document.getElementById('deleteButton').onclick = function() {
+    const isRecurring = {{ event.is_recurring|lower }};
+    const deleteOptions = document.getElementById('deleteOptions');
+    if (isRecurring) {
+      deleteOptions.style.display = 'block';
+      this.style.display = 'none';
+    } else {
+      const confirmDelete = confirm("Are you sure you wish to delete this event? This cannot be undone.");
+      if (confirmDelete) {
+        deleteEvent(false);
+      }
+    }
+  };
+  // Delete only this
+  document.getElementById('deleteOnlyThis').onclick = function() {
+    deleteEvent(false);
+  };
+  // Delete all
+  document.getElementById('deleteAll').onclick = function() {
+    deleteEvent(true);
+  };
+  // Delete event
+  function deleteEvent(deleteAll) {
+    const data = new FormData();
+    data.append('action', 'delete_event');
+    data.append('delete_all', deleteAll);
+    fetch("", {
+      method: 'POST',
+      body: data,
+      headers: {
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+    })
+            .then(response => {
+              if (response.ok) {
+                window.location.href = "/";
+              } else {
+                alert('Error deleting event: ' + response.statusText);
+              }
+            })
+            .catch(error => console.error('Error:', error));
+  }
+</script>
+
+{% endblock %}

@@ -1,0 +1,137 @@
+
+.landing {
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+    padding: 20px;
+    background: linear-gradient(rgba(var(--background-rgb), 0.5), rgba(var(--background-rgb), 0.5)), url('https://news.virginia.edu/sites/default/files/bigger_picture_sunset_ss_header_3-2.jpg') center/cover no-repeat;
+}
+
+.overlay {
+    text-align: left;
+    color: var(--text-color);
+    position: absolute;
+    top: 30%;
+    left: 10%;
+    width: 50%;
+}
+
+.landing-title {
+    font-size: 3rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(var(--background-secondary-rgb), 0.5),
+                 0 0 20px rgba(var(--background-secondary-rgb), 0.3); 
+}
+
+.google-button {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: #295192;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 180px; 
+    justify-content: center; 
+    text-decoration: none;
+}
+
+.google-button:hover {
+    background-color: #357ae8;
+}
+
+.google-logo {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.events-container {
+    position: absolute;
+    top: -100%;
+    right: -45%;
+    width: 400px;
+    height: 500px;
+    max-height: 500px;
+    background-color: rgba(var(--background-rgb), 0.8);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(var(--background-rgb), 0.5);
+    overflow-y: auto; 
+}
+
+.events-container h2 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+.events-container p{
+    color: var(--text-color);
+}
+
+.events-container ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.events-container li {
+    margin-bottom: 10px;
+}
+.event_item{
+    position: relative;
+    padding: 4px 8px;
+    border-radius: 7px;
+    font-size: 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 2px;
+    background: hidden;
+    color: var(--text-color);
+    overflow: hidden;
+    padding: 8px 15px;
+    box-shadow: 0 0 0 0 transparent;
+    transition: all 0.2s ease-in;
+    text-decoration: none;
+}
+.event_item:hover {
+    background:rgb(207, 98, 0);
+    box-shadow: 0 0 30px 5px rgba(207,98,0, 0.815);
+    transition: all 0.2s ease-out;
+}
+.create_event_button {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #E57200;
+    color: white;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-top: 15px;
+    text-align: center;
+    text-decoration: none;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+.create_event_button:hover {
+    background-color: rgb(207, 98, 0);
+}
+.expand-event-view{
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    background: hidden;
+    font-size: 12px;
+    color:var(--text-color);
+    padding: 4px 7px;
+    box-shadow: 0 0 0 0 transparent;
+    transition: all 0.2s ease-in;
+    text-decoration: underline;
+}

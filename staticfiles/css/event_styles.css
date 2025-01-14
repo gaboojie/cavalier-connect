@@ -1,0 +1,14 @@
+.profile-form-container {
+    max-width: 600px;
+    margin: 50px auto; 
+    padding: 40px; 
+}
+
+.submit-button {
+    background-color: #E57200;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+}

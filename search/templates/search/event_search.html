@@ -1,0 +1,296 @@
+{% extends "myaccount/base.html" %}
+
+{% block title %}
+Search for an event
+{% endblock %}
+
+{% block content %}
+
+<style>
+    :root {
+        --blue-color: #232D4B;
+        --orange-color: #E57200;
+    }
+    [data-theme="dark"] {
+        --blue-color: #e9e9e9;
+        --orange-color: #e9e9e9;
+    }
+
+    .blue-class {
+        color: var(--blue-color);
+    }
+
+    .blue-line {
+        border-bottom: 2px solid #0e3685
+    }
+
+    .submit-button {
+        background-color: #E57200;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 4px;
+    }
+
+    .submit-button:hover {
+        background-color: #d96e00;
+        border: 1px solid #0e3685;
+    }
+
+    .view-event-button {
+        background-color: #E57200;
+        color: #ffffff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+    }
+
+    .title-link-hover:hover {
+        color: #E57200;
+        font-weight: bolder;
+    }
+
+
+    .info-search-border {
+        border-radius: 0;
+        border: 2px solid var(--blue-color)
+    }
+
+    .info-search-element-border {
+        border: 0 none;
+    }
+    .info-search-row-element {
+        border: 0 none;
+    }
+    .info-search-row {
+        border-left: 1px solid #cccccc;
+        border-bottom: 1px solid #cccccc;
+        border-right: 1px solid #cccccc;
+        border-top: 0 none;
+        border-radius: 0;
+    }
+    .form-control-by-theme {
+        border: 0;
+        outline: 1px solid var(--blue-color);
+        background-color: transparent;
+    }
+    .checkbox-by-theme {
+        background-color: transparent;
+    }
+</style>
+
+<div style="padding: 50px"></div>
+
+<div style="padding: 2%">
+
+    <h1 class="display-5 blue-class" style="font-weight: bold;">Event Search:</h1>
+    <hr class="blue-line" style="margin-bottom: 30px">
+
+    <form action="/search/" method="post">
+        {% csrf_token %}
+        <!-- Top row -->
+        <div class="row blue-class align-items-center">
+            <div class="col-3" style="min-height: 50px">
+                <label for="id_title" style="font-weight: bold">Title:</label>
+                <input id="id_title" type="text" class="form-control form-control-by-theme" name="title" value='{{ form.title.value|default_if_none:"" }}' placeholder="-">
+            </div>
+            <div class="col-3">
+                <label for="id_creator" style="font-weight: bold">Creator: </label>
+                <input id="id_creator" type="text" class="form-control form-control-by-theme" name="creator" value='{{ form.creator.value|default_if_none:"" }}' placeholder="-">
+            </div>
+            <div class="col-3">
+                <label for="id_start_time" style="font-weight: bold">From time: </label>
+                <div id="id_start_time" name="start_time" class="form-control form-control-by-theme checkbox-by-theme">
+                    <div style="border: none; outline: none; background-color: transparent">
+                        {{ form.start_time }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-3">
+                <label for="id_end_time" style="font-weight: bold">To time: </label>
+                <div id="id_end_time" name="end_time" class="form-control form-control-by-theme checkbox-by-theme">
+                    {{ form.end_time }}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-1"> </div>
+
+        <!-- Bottom row -->
+        <div class="list-group list-group-horizontal blue-class align-items-center">
+            {% if user.is_authenticated and user.role != 2 %}
+                <div class="form-control checkbox-by-theme blue-class" style="border-width: 0; max-width: 17%;">
+                    <label for="id_only_my_invited_events" style="font-weight: bold">
+                        <div id="id_only_my_invited_events" name="only_my_invited_events">
+                            {{ form.only_my_invited_events }}
+                            Invited Events
+                        </div>
+                    </label>
+                </div>
+                <div class="form-control checkbox-by-theme blue-class" style="border-width: 0; max-width: 17%;">
+                    <label for="id_only_my_accepted_events" style="font-weight: bold">
+                        <div id="id_only_my_accepted_events" name="only_my_accepted_events">
+                            {{ form.only_my_accepted_events }}
+                            Accepted Events
+                        </div>
+                    </label>
+                </div>
+                <div class="form-control checkbox-by-theme blue-class" style="border-width: 0; max-width: 17%;">
+                    <label for="id_only_my_friends_accepted" style="font-weight: bold">
+                        <div id="id_only_my_friends_accepted" name="only_my_friends_accepted">
+                            {{ form.only_my_friends_accepted }}
+                            Friends Events
+                        </div>
+                    </label>
+                </div>
+                <div class="form-control checkbox-by-theme blue-class" style="border-width: 0; max-width: 17%;">
+                    <label for="id_only_my_events" style="font-weight: bold">
+                        <div id="id_only_my_events" name="id_only_my_events">
+                            {{ form.only_my_events }}
+                            Your Events
+                        </div>
+                    </label>
+                </div>
+                <div class="form-control checkbox-by-theme blue-class" style="border-width: 0; max-width: 17%;">
+                    <label for="id_only_recurring_events" style="font-weight: bold">
+                        <div id="id_only_recurring_events" name="only_recurring_events">
+                            {{ form.only_recurring_events }}
+                            Recurring Events
+                        </div>
+                    </label>
+                </div>
+            {% else %}
+                {% if user.role != 2 %}
+                    <li class="list-group-item" style="border-width: 0;">
+                        <p>You are logged in anonymously, so you have limited search information! Log-in to see more!</p>
+                    </li>
+                {% endif %}
+            {% endif %}
+            <li class="list-group-item flex-fill" style="border-width: 0;">
+                <button type="submit" class="submit-button pull-right" name="search" style="float:right; margin: 9px">Search</button>
+            </li>
+        </div>
+        <hr class="blue-line">
+
+        <!-- Search Results -->
+        <h1 class="display-6" style="font-weight: bold;">{{ search_title }}</h1>
+        <div class="blue-class" style="margin-left: 2%; margin-right: 2%; margin-bottom: 2%;">
+            <i>Showing {{ events|length }} out of {{ total_event_count }} events</i>
+            <div style="margin-bottom: 1%"></div>
+            <div class="list-group list-group-horizontal blue-class align-items-center info-search-border" style="font-weight: bold;">
+                {% if user.is_authenticated %}
+                    <div class="col-2 list-group-item info-search-element-border blue-class">
+                        Title:
+                    </div>
+                    <div class="col-3 list-group-item info-search-element-border blue-class">
+                        Description:
+                    </div>
+                    <div class="col-2 list-group-item info-search-element-border blue-class">
+                        Creator:
+                    </div>
+                    <div class="col-2 list-group-item info-search-element-border blue-class">
+                        Start time:
+                    </div>
+                    <div class="col-2 list-group-item info-search-element-border blue-class">
+                        End time:
+                    </div>
+                    <div class="col-1 list-group-item info-search-element-border text-center blue-class">
+                        Status:
+                    </div>
+                {% else %}
+                    <div class="col-3 list-group-item info-search-element-border blue-class">
+                        Title:
+                    </div>
+                    <div class="col-3 list-group-item info-search-element-border text center blue-class">
+                        Description:
+                    </div>
+                    <div class="col-2 list-group-item info-search-element-border blue-class">
+                        Creator:
+                    </div>
+                    <div class="col-2 list-group-item info-search-element-border blue-class">
+                        Start time:
+                    </div>
+                    <div class="col-2 list-group-item info-search-element-border blue-class">
+                        End time:
+                    </div>
+                {% endif %}
+            </div>
+            {% if events %}
+                {% for event in events %}
+                    <div class="list-group list-group-horizontal blue-class align-items-center info-search-row">
+                        {% if user.is_authenticated %}
+                            <div class="col-2 list-group-item info-search-row-element">
+                                <a href="{% url 'events:view_event' event.pk %}" class="blue-class title-link-hover" style="font-weight: bold; text-decoration: none">
+                                    {{ event.title }}
+                                </a>
+                            </div>
+                            <div class="col-3 list-group-item info-search-row-element blue-class">
+                                {{ event.description }}
+                            </div>
+                            <div class="col-2 list-group-item info-search-row-element blue-class">
+                                <i>{{ event.creator }}</i>
+                            </div>
+                            <div class="col-2 list-group-item info-search-row-element blue-class">
+                                {{ event.start_time }}
+                            </div>
+                            <div class="col-2 list-group-item info-search-row-element blue-class">
+                                {{ event.end_time }}
+                            </div>
+                            <div class="col-1 list-group-item info-search-row-element text-center blue-class">
+                                {{ event.status }}
+                            </div>
+                        {% else %}
+                            <div class="col-3 list-group-item info-search-row-element">
+                                <a href="{% url 'events:view_event' event.pk %}" class="blue-class title-link-hover" style="font-weight: bold; text-decoration: none">
+                                    {{ event.title }}
+                                </a>
+                            </div>
+                            <div class="col-3 list-group-item info-search-row-element blue-class">
+                                {{ event.description }}
+                            </div>
+                            <div class="col-2 list-group-item info-search-row-element blue-class">
+                                <i>{{ event.creator }}</i>
+                            </div>
+                            <div class="col-2 list-group-item info-search-row-element blue-class">
+                                {{ event.start_time }}
+                            </div>
+                            <div class="col-2 list-group-item info-search-row-element blue-class">
+                                {{ event.end_time }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p style="margin:5%">
+                    <b>Uh-oh!</b>
+                    No events were found that matched your search criteria!
+                </p>
+            {% endif %}
+
+            <label hidden for="id_page_number">page_number</label>
+            <input hidden id="id_page_number" type="number" class="align-baseline" name="page_number" value='{{ form.page_number.value|default_if_none:1 }}' style="margin-left: 0;">
+
+            <div class="d-flex justify-content-end align-items-center" style="margin: 10px;">
+                {% if events %}
+                    <i class="align-text-middle">
+                        Showing page {{ form.page_number.value|default_if_none:1 }} of {{ highest_page }}
+                    </i>
+                {% endif %}
+                {% if form.page_number.value != 1 %}
+                    <button type="submit" class="submit-button" name="prev" style="margin-left: 20px; padding: 5px 15px">
+                        Previous Page
+                    </button>
+                {% endif %}
+                {% if form.page_number.value != highest_page %}
+                    <button type="submit" class="submit-button" name="next" style="margin-left: 20px; padding: 5px 15px">
+                        Next Page
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        <hr class="blue-line" style="margin-bottom: 100px">
+    </form>
+</div>
+
+{% endblock %}

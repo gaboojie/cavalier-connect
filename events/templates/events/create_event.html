@@ -1,0 +1,127 @@
+{% extends "myaccount/base.html" %}
+
+<!--<script type=”text/javascript” src=”https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js”></script>-->
+<!--<link href=”https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css” rel=”stylesheet”>-->
+<!--<script src=”https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js”> </script>-->
+
+<style>
+    :root {
+        --blue-theme: #E57200;
+        --orange-color: #E57200;
+    }
+    [data-theme="dark"] {
+        --blue-theme: #e9e9e9;
+        --orange-color: #e9e9e9;
+    }
+
+    .blue-outline {
+        border: 1px solid #e57200;
+        outline: 1px solid #e57200;
+    }
+</style>
+
+{% block title %}
+Create event
+{% endblock %}
+
+{% block content %}
+<div style="padding: 10%">
+
+    <h1 class="display-1">Create your event:</h1>
+
+
+    <form action="/events/submit/" method="post">
+        {% csrf_token %}
+
+        <!-- Title -->
+        <div class="form-group row" style="padding-bottom: 10px">
+            <label for="id_title" style="font-size: 1.5em">Title: </label>
+            <input required id="id_title" class="form-control" style="border: 0 none; outline: 1px solid #0e3685" type="text" name="title" maxlength="200" value="">
+        </div>
+
+        <!-- Description -->
+        <div class="form-group row" style="padding-bottom: 10px">
+            <label for="id_description" style="font-size: 1.5em">Description: </label>
+            <input required id="id_description" class="form-control" type="text" name="description" value="" style="min-height: 200px; border: 0 none; outline: 1px solid #0e3685">
+        </div>
+
+
+        <!-- Location -->
+        <div class="form-group row" style="padding-bottom: 10px">
+            <label for="id_location" style="font-size: 1.5em">Location: </label>
+            <input required id="id_location" class="form-control" type="text" name="location" value="" style="border: 0 none; outline: 1px solid #0e3685">
+        </div>
+
+
+        <!-- Start time -->
+        <div class="form-group row" style="padding-bottom: 10px">
+            <label for="id_start_time" style="font-size: 1.5em">Start time:</label>
+            <input required id="id_start_time" type="datetime-local" class="form-control" name="start_time" value="" style="border: 0 none; outline: 1px solid #0e3685">
+        </div>
+
+        <!-- End time -->
+        <div class="form-group row" style="padding-bottom: 20px">
+            <label for="id_end_time" style="font-size: 1.5em">End time:</label>
+            <input required id="id_end_time" type="datetime-local" class="form-control" name="end_time" value="" style="border: 0 none; outline: 1px solid #0e3685">
+        </div>
+
+        <!-- Make Recurring -->
+        <div class="form-group" style="padding-bottom: 10px">
+            <label id ="repeat_checkbox_label"for="repeat_checkbox" style="font-size: 1.5em; padding-right: 20px">Will this event repeat?</label>
+            <input type="checkbox" class="align-baseline" id="repeat_checkbox" name="repeat_checkbox" style="margin-left: 0;">
+        </div>
+
+        <!-- Only Appears If Recurrence Selected -->
+        <!-- Recurrence Options -->
+        <div class="form-group row" id="recurrence_options" style="display: none; padding-bottom: 10px;">
+            <label for="id_is_recurring" style="font-size: 1.5em">How often will it repeat?</label>
+            <select id="id_is_recurring" name="recurrence_frequency" class="form-control" style="border: 0 none; outline: 1px solid #0e3685">
+                <option value="">Repeats:</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+            </select>
+        </div>
+        <!-- End of Recurrence Date -->
+        <div class="form-group row" id="recurrence_end_group" style="display: none; padding-bottom: 10px;">
+            <label for="id_recurrence_end" style="font-size: 1.5em">When should it stop?</label>
+            <input id="id_recurrence_end" type="datetime-local" class="form-control" name="recurrence_end" value="" style="border: 0 none; outline: 1px solid #0e3685">
+        </div>
+
+        <div class="container-fluid d-flex justify-content-center">
+            <input type="submit" class="submit-button" value="Create" style="margin-bottom: 10px">
+        </div>
+        <div id="error-message" style="color: red; text-align: center; margin-top: 10px;"></div>
+
+        <!-- End time error -->
+        {% if form.errors %}
+            <div class="alert alert-danger mt-3" role="alert">
+                <strong>Error:</strong><br>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Recurrence Script -->
+<script>
+    document.getElementById('repeat_checkbox').addEventListener('change', function() {
+        const recurrenceOptions = document.getElementById('recurrence_options');
+        const recurrenceEndGroup = document.getElementById('recurrence_end_group');
+        if (this.checked) {
+            recurrenceOptions.style.display = 'block';
+            recurrenceEndGroup.style.display = 'block';
+        } else {
+            recurrenceOptions.style.display = 'none';
+            recurrenceEndGroup.style.display = 'none';
+            document.getElementById('recurrence_end_group').style.display = 'none';
+        }
+    });
+</script>
+
+{% endblock %}

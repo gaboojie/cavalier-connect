@@ -1,0 +1,150 @@
+{% extends "myaccount/base.html" %}
+
+{% block title %}
+    My Account
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<div style="margin: 100px"></div>
+<div class="container rounded bg-white mt-5 mb-5">
+    <div class="row">
+        <div class="col-md-3 border light-dark-mode">
+            <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+                <form method="post" action="{% url 'update_profile' %}"  enctype="multipart/form-data" style="position: relative;">
+                    {% csrf_token %}
+                    <label for="profile-upload" style="cursor: pointer;">
+                        {% if profile_picture %}
+                                <img class="rounded-circle mt-5" width="150px"
+                                     src="{{ profile_picture.get_file_url }}" alt="Profile Picture">
+                        {% else %}
+                            <img class="rounded-circle mt-5" width="150px"
+                                 src="https://i.pinimg.com/280x280_RS/55/96/4e/55964ebb02710d6b9ce1c26f1d857906.jpg"
+                                 alt="Anonymous Profile Picture">
+                        {% endif %}
+                    </label>
+                    {% if not update_profile_info %}
+                    <input type="file" name="file" id="profile-upload" style="display: none;" onchange="this.form.submit()">
+                    {% endif %}
+                </form>
+                {% if file_error_msg %}
+                    <div class="text-danger mt-2">{{ file_error_msg }}</div>
+                {% endif %}
+                <span class="font-weight-bold mt-3" style = "font-weight: 600;">{{user.first_name}} {{user.last_name}}</span>
+                <span class = "mb-2"style = "color:green">{{user.email}}</span>
+                {% if not update_profile_info %}
+                <form method="POST" action="{% url 'delete_account' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="update-profile-btn" style="border: 1px solid #0e3685" >Delete Account</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+            <div class="col-md-5 border light-dark-mode">
+                <form method="post" action="{% url 'update_profile_info' %}">
+                {% csrf_token %}
+                <div class="p-3 py-5">
+                    <div class="d-flex justify-content-center align-items-center mb-3">
+                        <h4>Hi, {{ user.first_name }} {{ user.last_name }}!</h4>
+                    </div>
+                    <div class="row mt-2 d-flex justify-content-center align-items-center text-center">
+                        {% if update_profile_info %}
+                        <div class="col-md-6 mb-3">
+                            <label class="labels">Name</label>
+                            <input style="text-align: center;" type="text" class="form-control" id="name" name="name" value="{{ user.first_name }} {{ user.last_name }}" disabled>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="labels" style = "color: var(--blue-color)">Username</label>
+                            <input style="text-align: center;" type="text" class="form-control" id="username" name="username" value = "{{user.username}}">
+                        </div>
+                        {% else %}
+                        <div class="col-md-6 mb-3">
+                            <label class="labels">Name</label>
+                            <p>{{ user.first_name }} {{ user.last_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="labels">Username</label>
+                            <p>{{ user.username }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="row mt-3 d-flex justify-content-center align-items-center text-center">
+                        {% if update_profile_info %}
+                        <div class="col-md-6" style = "color: var(--blue-color)"><label class="labels">Mobile Number</label>
+                            <input style="text-align: center;" type="text" class="form-control" id="phone_number" name="phone_number" value = "{{user.phone_number}}">
+                        </div>
+                        <div class="col-md-6"><label class="labels">Account Type</label>
+                            <input style="text-align: center;" type ="text" class ="form-control" value = "{% if user.role == 0 %} Anonymous{% elif user.role == 1 %} Common User {% elif user.role == 2 %} PMA Administrator{% elif user.role == 3 %} Django Administrator{% endif %}" disabled>
+                        </div>
+                        {% else %}
+                            {% if user.phone_number %}
+                            <div class="col-md-6 mb-3"><label class="labels">Mobile Number {% if verified.verified_number %} &#x2713 {% endif %}</label><p>({{user.phone_number|slice:":3"}}) {{user.phone_number|slice:"3:6"}}-{{user.phone_number|slice:"6:10"}}</p></div>
+                            {% else %}
+                            <div class="col-md-6 mb-3"><label class="labels">Mobile Number</label><p>None</p></div>
+                            {% endif %}
+                            <div class="col-md-6 mb-3"><label class="labels">Account Type</label><p> {% if user.role == 0 %} Anonymous
+                                {% elif user.role == 1 %} Common User
+                                {% elif user.role == 2 %} PMA Administrator
+                                {% elif user.role == 3 %} Django Administrator
+                                {% endif %}</p>
+                            </div>
+                        {% endif %}
+                        <div class="row mt-3">
+                            {% if notif_error %}
+                            <div class="error-message">Please update your phone number first!</div>
+                            {% endif %}
+                            {% if form.username.errors %}
+                                <div class="error-message">
+                                    {% for error in form.username.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            {% if form.phone_number.errors %}
+                                <div class="error-message">
+                                    {% for error in form.phone_number.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        </div>
+                        <div class="mt-3 text-center align-items-center">
+                            {% if update_profile_info %}
+                            <button class ="update-profile-btn" style="border: 1px solid #0e3685" type="submit">Save</button>
+                            {% else %}
+                            <a class="update-profile-btn" style="border: 1px solid #0e3685" href="/logout">Logout</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+                </div>
+                <div class="col-md-4 border d-flex align-items-center justify-content-center light-dark-mode">
+                    <div class="text-center">
+                        {% if update_profile_info %}
+                        <a class = "update-profile-btn" style="border: 1px solid #0e3685" href="{% url 'myaccount' %}"><span>Return</span><br></a>
+                        {% else %}
+                        <a class = "update-profile-btn mb-1 profile d-block" style="border: 1px solid #0e3685" href="{% url 'update_profile_info' %}"><span>Update Profile Info</span><br></a>
+                        <a class = "update-profile-btn mb-1 notif d-block" style="border: 1px solid #0e3685" href="{% url 'notification_settings' %}"><span>Notification Settings</span><br></a>
+                        {% if not verified.verified_number %}
+                        <a class = "update-profile-btn verify-phone d-block" style="border: 1px solid #0e3685" href="{% url 'verify_phone_number' %}"><span>Verify Phone Number</span><br></a>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div style="margin: 30vh"></div>
+<div class="text-center d-flex flex-column justify-content-center align-items-center">
+    <h4 style="color: var(--blue-color);">You are not logged in.</h4>
+    <p>Please sign in with Google to continue.</p>
+    <a class="google-button" href="{% url 'social:begin' 'google-oauth2' %}">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-logo">
+        Sign in with Google
+    </a>
+</div>
+{% endif %}
+{% endblock %}

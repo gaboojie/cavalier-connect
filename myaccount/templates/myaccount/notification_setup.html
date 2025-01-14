@@ -1,0 +1,72 @@
+{% extends "myaccount/base.html" %}
+
+{% block title %}
+    Notification Settings
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+{% if user.phone_number %}
+<div style="margin: 50px"></div>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-8 mx-auto">
+            <div class="my-4">
+                <h5 class="mb-0 mt-5" style="color:var(--blue-color)">Notifications Settings</h5>
+                <p>Select the notification type(s) you want to receive!</p>
+                <hr class="my-4" />
+                <strong class="mb-0" style="color:var(--blue-color)">General</strong>
+                <p>Please select a notification type</p>
+                <form method="POST" action="{% url 'notification_settings' %}">
+                {% csrf_token %}
+                    <div class="list-group mb-5 shadow">
+                        <div class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <strong class="mb-0" style="color:var(--blue-color)">Email Notification</strong>
+                                    <p class="mb-0" style="color:var(--text-color)">Recieve email notification on event invites/requests!</p>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="alert1" name ="email_notifications"{% if preferences.email_notifications %}checked {% endif %} />
+                                        <span class="custom-control-label"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <strong class="mb-0" style="color:var(--blue-color)">SMS Notification</strong>
+                                    <p class="mb-0" style="color:var(--text-color)">Recieve notification to mobile number regarding event activities!</p>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="alert2" name ="sms_notifications"{% if preferences.sms_notifications %} checked {% endif %} />
+                                        <span class="custom-control-label"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="update-profile-btn d-block">Save Changes</button>
+                    <a class = "update-profile-btn d-block mt-3 text-center" href="{% url 'myaccount' %}">Return</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+{% else %}
+<div class="text-center d-flex flex-column align-items-center" style = "margin-top: 300px; padding: 10px;">
+    <h4 style="color: var(--blue-color);">You need to verify your phone number first to continue.</h4>
+    <a href="/myaccount" class="orange-btn w-25 mt-3">Return</a>
+</div>
+{% endif %}
+{% else %}
+<div class="text-center mt-5">
+    <h4 style="color: var(--blue-color);">You are not logged in.</h4>
+    <p>Please sign in with Google to continue.</p>
+    <a href="{% url 'social:begin' 'google-oauth2' %}" class="google-sign-in-button">Sign in with Google</a>
+</div>
+{% endif %}
+{% endblock %}

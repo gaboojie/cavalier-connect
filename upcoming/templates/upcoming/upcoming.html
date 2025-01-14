@@ -1,0 +1,448 @@
+{% extends "myaccount/base.html" %}
+
+{% block title %}
+Upcoming Events
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+    .blue-line {
+        border-bottom: 2px solid #232D4B
+    }
+
+    .custom-control-label {
+        padding: 10px 20px;
+        border: 1px solid var(--blue-color);
+        border-radius: 8px;
+    }
+    .custom-control-label:hover {
+        background-color: var(--hover-color);
+        border-color: var(--hover-color);
+        box-shadow: 0 0 5px var(--blue-color);
+    }
+    .custom-control-input:checked ~ .custom-control-label {
+        background-color: #232D4B;
+        color: white;
+    }
+    .create-event-btn-upcoming {
+        background-color: #E57200;
+        color: white;
+        text-align: center;
+        padding: 10px 20px;
+        border: 1px solid #E57200;
+        border-radius: 8px;
+    }
+    .create-event-btn-upcoming:hover {
+        background-color: white;
+        border-color: #E57200;
+        color: #E57200;
+    }
+    .calendar-event-button {
+        background-color: var(--background-color);
+        color: var(--blue-color);
+        border: 1px solid var(--blue-color);
+        border-radius: 5px;
+        font-size: 12px;
+        padding:5px;
+    }
+    .calendar-day {
+        color: var(--blue-color);
+        font-weight: bold;
+    }
+    .calendar-event-button:hover {
+        background-color: var(--blue-hover-color);
+        color: white;
+        border: 1px solid var(--blue-hover-color);
+        border-radius: 5px;
+    }
+    .filter-events-select {
+        background-color: var(--background-color);
+        color: var(--blue-color);
+    }
+    .filter-events-select:hover {
+        box-shadow: 0 0 5px #232D4B;
+    }
+    .view-container {
+        border: 2px solid #232D4B;
+        border-radius: 8px;
+        min-width: 800px;
+        min-height: 400px;
+    }
+    .view-month-day {
+        min-height: 200px;
+        border: 1px solid #cccccc;
+        background-color: var(--background-color);
+    }
+    .view-month-day:hover {
+        background-color: var(--hover-color);;
+    }
+    .view-top-row {
+        background-color: #232D4B;
+        min-height: 50px;
+    }
+    .view-list-top-row {
+        background-color: var(--background-color);
+        min-height: 50px;
+        font-weight: bold;
+        border-bottom: 2px solid #232D4B;
+    }
+    .view-list-row {
+        background-color: var(--background-color);
+        min-height: 50px;
+        color: var(--text-color);
+        border-bottom: 1px solid #232D4B;
+    }
+    .view-list-title {
+        color: #E57200;
+    }
+    .view-list-title:hover {
+        color: #f69331;
+    }
+    .view-title {
+        color: #ffffff;
+        font-weight: bold;
+        font-size: x-large;
+    }
+    .week-event {
+        list-style-type: none;
+        padding: 3px;
+        font-size: 12px;
+        color: var(--blue-color);
+        background-color: var(--background-color);
+    }
+    .week-event:hover {
+        list-style-type: none;
+        padding: 3px;
+        font-size: 12px;
+        color: white;
+        background-color: #232D4B;
+    }
+    .filter-time-select {
+        color: white;
+        background-color: #232D4B;
+        border: 1px solid white;
+        border-radius: 4px;
+        padding: 6px;
+    }
+    .filter-time-select:hover {
+        box-shadow: 0 0 5px white;
+        color: white;
+    }
+    .title-time-button {
+        color: white;
+        border: 1px solid white;
+        border-radius: 4px;
+        padding: 5px 8px;
+        margin-left: 8px;
+    }
+    .title-time-button:hover {
+        box-shadow: 0 0 5px white;
+        color: white;
+    }
+</style>
+<div style="margin: 50px"></div>
+<div style="padding: 4%">
+    <div class="d-flex flex-row">
+        <div class="col-8">
+            <h1 class="display-5" style="font-weight: bold; color: var(--blue-color);">
+                {{ page_title }}
+            </h1>
+        </div>
+        <div class="col-4 d-flex justify-content-end align-items-center">
+            <a class="create-event-btn-upcoming align-items-center text-center" href="{% url 'events:create_event' %}" style="max-width: 150px">
+                Create Event
+            </a>
+        </div>
+    </div>
+
+    <hr class="blue-line" style="margin-bottom: 30px">
+    <form action="/upcoming/" method="post">
+        {% csrf_token %}
+
+        <div class="row">
+            <!-- Get View Type -->
+            <div class="btn-group col-6" data-toggle="buttons">
+                <!-- Display List View Input -->
+                <div class="custom-control custom-radio custom-control-inline">
+                    {% if form.view_type.initial == "list" %}
+                        <input type="radio" class="custom-control-input d-none" value="list" name="view_type" data-toggle="button" id="list" autocomplete="off" checked>
+                        <label class="custom-control-label" for="list">
+                            List View
+                        </label>
+                    {% else %}
+                        <input type="radio" class="custom-control-input d-none" value="list" name="view_type" data-toggle="button" id="list_checked" autocomplete="off" onchange="this.form.submit()">
+                        <label class="custom-control-label" for="list_checked">
+                            List View
+                        </label>
+                    {% endif %}
+                </div>
+                <div style="margin-right: 10px"></div>
+                <!-- Display Calendar View Input -->
+                <div class="custom-control custom-radio custom-control-inline">
+                    {% if form.view_type.initial == "list" %}
+                        <input type="radio" class="custom-control-input d-none" value="calendar" name="view_type" data-toggle="button" id="calendar" autocomplete="off" onchange="this.form.submit()">
+                        <label class="custom-control-label" for="calendar">
+                            Calendar View
+                        </label>
+                    {% else %}
+                        <input type="radio" class="custom-control-input d-none" value="calendar" name="view_type" data-toggle="button" id="calendar_checked" autocomplete="off" checked>
+                        <label class="custom-control-label" for="calendar_checked">
+                            Calendar View
+                        </label>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-6 d-flex justify-content-end">
+                <select class="custom-select filter-events-select btn" name="filter_type" style="border-color: #232D4B" onchange="this.form.submit()">
+                    {% if form.filter_type.value == "all" %}
+                        <option class="light-dark-mode" value="all" selected>Show all events</option>
+                    {% else %}
+                        <option class="light-dark-mode" value="all">Show all events</option>
+                    {% endif %}
+                    {% if form.filter_type.value == "my_created" %}
+                        <option class="light-dark-mode" value="my_created" selected>Show your created events</option>
+                    {% else %}
+                        <option class="light-dark-mode" value="my_created">Show your created events</option>
+                    {% endif %}
+                    {% if form.filter_type.value == "my_invited" %}
+                        <option class="light-dark-mode" value="my_invited" selected>Show your invited events</option>
+                    {% else %}
+                        <option class="light-dark-mode" value="my_invited">Show your invited events</option>
+                    {% endif %}
+                    {% if form.filter_type.value == "my_accepted" %}
+                        <option class="light-dark-mode" value="my_accepted" selected>Show your accepted events</option>
+                    {% else %}
+                        <option class="light-dark-mode" value="my_accepted">Show your accepted events</option>
+                    {% endif %}
+                    {% if form.filter_type.value == "my_friends" %}
+                        <option class="light-dark-mode" value="my_friends" selected>Show your friends' events</option>
+                    {% else %}
+                        <option class="light-dark-mode" value="my_friends">Show your friends' events</option>
+                    {% endif %}
+                    {% if form.filter_type.value == "my_recurring" %}
+                        <option class="light-dark-mode" value="my_recurring" selected>Show your recurring events</option>
+                    {% else %}
+                        <option class="light-dark-mode" value="my_recurring">Show your recurring events</option>
+                    {% endif %}
+                </select>
+            </div>
+        </div>
+
+        <!-- Display list view -->
+        <div style="margin-top: 30px"></div>
+        <div class="container view-container">
+            <!-- Make top row -->
+            <div class="row view-top-row">
+                <div class="col-5 d-flex align-items-center">
+                    <div class="view-title">
+                        {{ view_title }}
+                    </div>
+                </div>
+                <div class="col-7 d-flex align-items-center justify-content-end">
+                    <select class="custom-select filter-time-select" name="time_type" onchange="this.form.submit()">
+                        {% if form.time_type.value == "day" %}
+                            <option value="day" selected>Showing events by day</option>
+                        {% else %}
+                            <option value="day">Showing events by day</option>
+                        {% endif %}
+                        {% if form.time_type.value == "week" %}
+                            <option value="week" selected>Showing events by week</option>
+                        {% else %}
+                            <option value="week">Showing events by week</option>
+                        {% endif %}
+                        {% if form.time_type.value == "month" %}
+                            <option value="month" selected>Showing events by month</option>
+                        {% else %}
+                            <option value="month">Showing events by month</option>
+                        {% endif %}
+                    </select>
+
+                    <button type="submit" name="prev" class="title-time-button">Last {{ form.time_type.initial }}</button>
+                    <button type="submit" name="next" class="title-time-button">Next {{ form.time_type.initial }}</button>
+                </div>
+            </div>
+            {% if form.view_type.initial == "list" %}
+                <div class="row view-list-top-row align-items-center light-dark-mode">
+                    <div class="col-3">
+                        Title
+                    </div>
+                    <div class="col-3">
+                        Creator
+                    </div>
+                    <div class="col-3">
+                        Start time
+                    </div>
+                    <div class="col-3">
+                        Status
+                    </div>
+                </div>
+
+                {% if events %}
+                    {% for event in events %}
+                        <div class="row view-list-row align-items-center light-dark-mode">
+                            <div class="col-3">
+                                <a href="{% url 'events:view_event' event.pk %}" class="view-list-title" style="font-weight: bold; text-decoration: none;">
+                                    {{ event.title }}
+                                </a>
+                            </div>
+                            <div class="col-3">
+                                {{ event.creator }}
+                            </div>
+                            <div class="col-3">
+                                {{ event.start_time }}
+                            </div>
+                            <div class="col-3">
+                                {{ event.status }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- No events are shown -->
+
+                {% endif %}
+            {% else %}
+                <!-- Calendar View -->
+                {% if form.time_type.initial == 'month' %}
+                    <!-- Show Month Calendar View -->
+
+                    <!-- Title bar -->
+                    <div class="row view-list-top-row align-items-center">
+                        <div class="col" style="color: var(--blue-color)">
+                            Sunday
+                        </div>
+                        <div class="col" style="color: var(--blue-color)">
+                            Monday
+                        </div>
+                        <div class="col" style="color: var(--blue-color)">
+                            Tuesday
+                        </div>
+                        <div class="col" style="color: var(--blue-color)">
+                            Wednesday
+                        </div>
+                        <div class="col" style="color: var(--blue-color)">
+                            Thursday
+                        </div>
+                        <div class="col" style="color: var(--blue-color)">
+                            Friday
+                        </div>
+                        <div class="col" style="color: var(--blue-color)">
+                            Saturday
+                        </div>
+                    </div>
+
+                    <!-- Display each week -->
+                    {% for week in events %}
+                        <div class="row">
+                            {% for day in week %}
+                                {% if day.0 == 'None' %}
+                                    <div class="col" style="background-color: var(--background-color); min-height: 200px; border: 1px solid #cccccc"></div>
+                                {% else %}
+                                    <div class="col view-month-day">
+                                        <ul style="list-style-type: none; padding: 0">
+                                            <li class="calendar-day" style="text-align: right; margin-bottom: 5px">
+                                                {{ day.0 }}
+                                            </li>
+                                            {% for event in day.1 %}
+<!--                                                <li style="text-align: left; margin-bottom: 10px;">-->
+<!--                                                    <a href="{% url 'events:view_event' event.pk %}" class="calendar-event-button light-dark-mode" style="font-weight: bold; text-decoration: none">-->
+<!--                                                        {{ event.title }}-->
+<!--                                                    </a>-->
+<!--                                                </li>-->
+                                                <div style="" class="calendar-event-button light-dark-mode fw-bold" onclick="window.location.href='/events/{{ event.pk }}';">
+                                                    {{ event.title }}
+                                                </div>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                {% elif form.time_type.initial == 'week' %}
+                    <!-- Title bar -->
+                    <div class="row view-list-top-row align-items-center">
+                        {% for day in events.keys %}
+                            <div class="col">
+                                {{ day }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <!-- Create week by creating columns for each day -->
+                    <div class="row" style="min-height: 400px">
+                        {% for day, day_events in events.items %}
+                            <div class="col" style="border: 1px solid #232D4B">
+                                <ul style="list-style-type: none; padding: 0; margin: 5px">
+                                    {% for event in day_events %}
+                                        <li class="week-event " style="margin-top: 10px; border: 1px solid #232D4B; border-radius: 8px">
+                                            <div style="" onclick="window.location.href='/events/{{ event.pk }}';">
+                                                <strong> {{ event.title }} </strong>
+                                                <p style="margin: 0;">Status: {{ event.status }} </p>
+                                                <p style="margin: 0;">Starts: {{ event.start_time }}</p>
+                                            </div>
+<!--                                            <ul style="list-style-type: none; padding: 2px" >-->
+<!--                                                -->
+<!--                                                <li style="font-weight: bold">-->
+<!--                                                    -->
+<!--                                                </li>-->
+<!--                                                <li>-->
+<!--                                                    -->
+<!--                                                </li>-->
+<!--                                                <li>-->
+<!--                                                    -->
+<!--                                                </li>-->
+<!--                                            </ul>-->
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {% for hour, hour_events in events.items %}
+                        <div class="row align-items-start text-center" style="border: 1px outset var(--background-color); min-height: 50px; background-color: var(--background-color);">
+                            <div class="col-2 align-items-center text-center" style="color: var(--blue-color)">
+                                {{ hour_events.0 }}
+                            </div>
+                            <div class="col-10" style="background-color: var(--background-color); min-height: 50px; height: 100%">
+                                {% for event in hour_events.1 %}
+                                    <li class="week-event" style="margin: 10px; border: 1px solid var(--blue-color); border-radius: 8px">
+                                        <ul style="list-style-type: none; padding: 2px" onclick="window.location.href='/events/{{ event.pk }}';">
+                                            <li style="font-weight: bold; font-size: 18px; padding-top: 5px">
+                                                {{ event.title }}
+                                            </li>
+                                            <li>
+                                                Description: {{ event.description }}
+                                            </li>
+                                            <li>
+                                                Starts: {{ event.start_time }}
+                                            </li>
+                                            <li>
+                                                Ends: {{ event.end_time }}
+                                            </li>
+                                            <li>
+                                                Status: {{ event.status }}
+                                            </li>
+                                        </ul>
+                                    </li>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endif %}
+
+        </div>
+
+
+        <div style="margin-bottom: 100px"></div>
+
+        <div hidden>
+            {{ form.start_time }}
+        </div>
+    </form>
+</div>
+
+{% endblock %}

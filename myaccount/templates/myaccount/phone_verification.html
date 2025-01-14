@@ -1,0 +1,60 @@
+{% extends "myaccount/base.html" %}
+
+{% block title %}
+    Notification Settings
+{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+
+<form method="POST" action = "{% url 'verify_phone_number' %}">
+    {% csrf_token %}
+    <div class="container p-5 py-3">
+        <div class="row">
+            <div class="col-md-6 mt-5">
+                <div class="light-dark-mode p-5 rounded-3 shadow-sm border">
+                    <div>
+                        <p class="text-center text-success" style="font-size: 5.5rem;"><i class="fa-solid fa-envelope-circle-check"></i></p>
+                        <p class="text-center h5" style="color:var(--blue-color)">Please check your text message</p>
+                        <p class="text-center" style="color:var(--text-color)">We've sent a code to +1 ({{user.phone_number|slice:":3"}}) {{user.phone_number|slice:"3:6"}}-{{user.phone_number|slice:"6:10"}}</p>
+                        <div class="row pt-4 pb-2">
+                            <div class="col-3">
+                                <input class="otp-letter-input" name ="otp1" type="text" maxlength="1" required>
+                            </div>
+                            <div class="col-3">
+                                <input class="otp-letter-input" name ="otp2" type="text" maxlength="1" required>
+                            </div>
+                            <div class="col-3">
+                                <input class="otp-letter-input" name ="otp3" type="text" maxlength="1" required>
+                            </div>
+                            <div class="col-3">
+                                <input class="otp-letter-input" name ="otp4" type="text" maxlength="1" required>
+                            </div>
+                        </div>
+                        {% if verify_error %}
+                        <p class = "text-error text-center"> {verify_error}</p>
+                        {% endif %}
+                        <p class="text-center" style="color:var(--text-color)">Didn't get the code? <a  href="{% url 'verify_phone_number' %}" style="color:#e57200">Click to resend.</a></p>
+
+                        <div class="row pt-5">
+                            <div class="col-6">
+                                <button class="w-100"><a class="update-profile-btn" href="{% url 'myaccount' %}">Return</a></button>
+                            </div>
+                            <div class="col-6">
+                                <button type="submit" class="update-profile-btn w-100">Verify</button>
+                            </div>                                     
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% else %}
+<div class="text-center mt-5">
+    <h4 style="color: #232D4B;">You are not logged in.</h4>
+    <p>Please sign in with Google to continue.</p>
+    <a href="{% url 'social:begin' 'google-oauth2' %}" class="google-sign-in-button">Sign in with Google</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "myaccount/base.html" %}
+
+{% block title %}
+    Poll Results
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .profile-form-container {
+        max-width: 600px;
+        margin: 50px auto; 
+        padding: 40px;
+        }
+</style>
+
+<div class="container mt-5">
+    <div class="profile-form-container">
+        <h3 class="text-center" style="color: var(--blue-color)">Enter Your Information</h3>
+        <form method="post" action="">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="first_name">First Name</label>
+                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ user.first_name }}">
+            </div>
+            <div class="mb-3">
+                <label for="last_name">Last Name</label>
+                <input type="text" class="form-control" id="last_name" name="last_name" value="{{ user.last_name }}">
+            </div>
+            <div class="mb-3">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username">
+                {% if form.username.errors %}
+                    <div class="error-message">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label for="phone_number">Mobile Number</label>
+                <input type="text" class="form-control" id="phone_number" name="phone_number" placeholder="Enter your Mobile Number">
+                {% if form.phone_number.errors %}
+                    <div class="error-message">{{ form.phone_number.errors.0 }}</div>
+                {% endif %}
+            </div>
+            <div class="mb-3">
+                <label for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+            </div>
+            <div class="text-center mt-4">
+                <button type="submit" class="update-profile-btn">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

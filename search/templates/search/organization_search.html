@@ -1,0 +1,148 @@
+{% extends "myaccount/base.html" %}
+
+{% block title %}
+Search for an organization
+{% endblock %}
+
+{% block content %}
+
+<style>
+:root {
+    --blue-color: #232D4B;
+    --orange-color: #E57200;
+}
+[data-theme="dark"] {
+    --blue-color: #e9e9e9;
+    --orange-color: #e9e9e9;
+}
+
+.blue-class {
+color: var(--blue-color);
+}
+
+.blue-line {
+    border-bottom: 2px solid #0e3685
+}
+
+.submit-button {
+    background-color: #E57200;
+        color: #ffffff;
+border: none;
+padding: 10px 20px;
+font-size: 16px;
+border-radius: 4px;
+}
+
+.submit-button:hover {
+    background-color: #d96e00;
+        border: 1px solid #0e3685;
+}
+
+.view-event-button {
+    background-color: #E57200;
+        color: #ffffff;
+border: none;
+border-radius: 4px;
+padding: 10px 20px;
+}
+
+.title-link-hover:hover {
+    color: #E57200;
+    font-weight: bolder;
+}
+
+
+.info-search-border {
+    border-radius: 0;
+border: 2px solid var(--blue-color)
+}
+
+.info-search-element-border {
+    border: 0 none;
+}
+.info-search-row-element {
+    border: 0 none;
+}
+.info-search-row {
+    border-left: 1px solid #cccccc;
+    border-bottom: 1px solid #cccccc;
+    border-right: 1px solid #cccccc;
+    border-top: 0 none;
+border-radius: 0;
+}
+.form-control-by-theme {
+    border: 0;
+    outline: 1px solid var(--blue-color);
+    background-color: transparent;
+}
+.search-icon {
+    width: 50px;
+    height: 50px;
+    background-color: white;
+    border: 1px solid #232D4B;
+}
+.search-icon:hover {
+    width: 50px;
+    height: 50px;
+    background-color: #232D4B;
+}
+</style>
+
+<div style="padding: 50px"></div>
+
+<div style="padding: 2%">
+    <h1 class="display-5 blue-class" style="font-weight: bold;">Organization Search:</h1>
+    <hr class="blue-line" style="margin-bottom: 30px">
+    <form action="/search/organization/" method="post">
+        {% csrf_token %}
+        <div class="row blue-class align-items-center">
+            <div class="col-4" style="min-height: 50px">
+                <label for="id_name" style="font-weight: bold">Name:</label>
+                <input id="id_name" type="text" class="form-control form-control-by-theme" name="name" value='{{ name|default_if_none:"" }}' placeholder="-">
+            </div>
+            <div class="col-4">
+                <label for="id_creator_username" style="font-weight: bold">Creator: </label>
+                <input id="id_creator_username" type="text" class="form-control form-control-by-theme" name="creator_username" value='{{ creator_username|default_if_none:"" }}' placeholder="-">
+            </div>
+            <div class="col-3"></div>
+            <div class="col-1">
+                <button class="btn d-flex align-items-center justify-content-center search-icon">
+                    {% load static %}
+                    <img src="{% static 'admin/img/search.svg' %}" alt="Search" />
+                </button>
+            </div>
+        </div>
+
+        <div class="fluid-container" style="margin-top: 30px; border-left: 1px solid var(--blue-color); border-right: 1px solid var(--blue-color)">
+            <div class="list-group list-group-horizontal blue-class align-items-center" style="font-weight: bold; min-height: 50px; color: white; background-color: #232D4B; border-radius: 0">
+                <div class="col-8 align-items-center text-center" style="border-right: 1px solid white">
+                    Organization name:
+                </div>
+                <div class="col-4 align-items-center text-center">
+                    Creator username:
+                </div>
+            </div>
+            {% if organizations %}
+                {% for organization in organizations %}
+                    <div class="list-group list-group-horizontal align-items-center" style="min-height: 40px; color: var(--blue-color); background-color: var(--background-color); border-radius: 0; border-bottom: 1px solid #232D4B">
+                        <div class="col-8 align-items-center text-center">
+                            <a href="{% url 'organizations:view_organization' organization.pk %}" class="title-link-hover" style="text-decoration: none; color: var(--blue-color);">
+                                {{ organization.name }}
+                            </a>
+                        </div>
+                        <div class="col-4 align-items-center text-center">
+                            {{ organization.creator.username }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="list-group list-group-horizontal blue-class align-items-center" style="min-height: 40px; padding: 30px; border-radius: 0; border-bottom: 1px solid #232D4B">
+                    No organizations were found!
+                </div>
+            {% endif %}
+        </div>
+    </form>
+    <hr class="blue-line" style="margin-bottom: 50px; margin-top: 50px">
+</div>
+
+{% endblock %}
